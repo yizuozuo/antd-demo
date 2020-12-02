@@ -1,6 +1,6 @@
 // import routerMap from '@/router/async/router.map'
 // import {mergeI18nFromRoutes} from '@/utils/i18n'
-import i18n from './lang'
+import {mergeI18nFromRoutes} from '@/lang'
 import Router from 'vue-router'
 // import deepMerge from 'deepmerge'
 // import basicOptions from '@/router/async/config.async'
