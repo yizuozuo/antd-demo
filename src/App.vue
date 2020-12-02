@@ -1,284 +1,86 @@
 <template>
-  <div id="app">
-    <div class="content">
-      <a-form :form="form" @submit="handleSubmit">
-        <a-form-item v-bind="formItemLayout" label="邮箱">
-          <a-input
-            v-decorator="[
-              'email',
-              {
-                rules: [
-                  {
-                    type: 'email',
-                    message: 'The input is not valid E-mail!',
-                  },
-                  {
-                    required: true,
-                    message: 'Please input your E-mail!',
-                  },
-                ],
-              },
-            ]"
-          />
-        </a-form-item>
-        <a-form-item v-bind="formItemLayout" label="密码" has-feedback>
-          <a-input
-            v-decorator="[
-              'password',
-              {
-                rules: [
-                  {
-                    required: true,
-                    message: 'Please input your password!',
-                  },
-                  {
-                    validator: validateToNextPassword,
-                  },
-                ],
-              },
-            ]"
-            type="password"
-          />
-        </a-form-item>
-        <a-form-item v-bind="formItemLayout" label="确认密码" has-feedback>
-          <a-input
-            v-decorator="[
-              'confirm',
-              {
-                rules: [
-                  {
-                    required: true,
-                    message: 'Please confirm your password!',
-                  },
-                  {
-                    validator: compareToFirstPassword,
-                  },
-                ],
-              },
-            ]"
-            type="password"
-            @blur="handleConfirmBlur"
-          />
-        </a-form-item>
-        <a-form-item v-bind="formItemLayout">
-          <span slot="label">
-            昵称&nbsp;
-            <a-tooltip title="What do you want others to call you?">
-              <a-icon type="question-circle-o" />
-            </a-tooltip>
-          </span>
-          <a-input
-            v-decorator="[
-              'nickname',
-              {
-                rules: [{ required: true, message: 'Please input your nickname!', whitespace: true }],
-              },
-            ]"
-          />
-        </a-form-item>
-        <a-form-item v-bind="formItemLayout" label="Habitual Residence">
-          <a-cascader
-            v-decorator="[
-              'residence',
-              {
-                initialValue: ['zhejiang', 'hangzhou', 'xihu'],
-                rules: [
-                  { type: 'array', required: true, message: 'Please select your habitual residence!' },
-                ],
-              },
-            ]"
-            :options="residences"
-          />
-        </a-form-item>
-        <a-form-item v-bind="formItemLayout" label="电话">
-          <a-input
-            v-decorator="[
-              'phone',
-              {
-                rules: [{ required: true, message: 'Please input your phone number!' }],
-              },
-            ]"
-            style="width: 100%"
-          >
-            <a-select
-              slot="addonBefore"
-              v-decorator="['prefix', { initialValue: '86' }]"
-              style="width: 70px"
-            >
-              <a-select-option value="86">
-                +86
-              </a-select-option>
-              <a-select-option value="87">
-                +87
-              </a-select-option>
-            </a-select>
-          </a-input>
-        </a-form-item>
-        <a-form-item v-bind="formItemLayout" label="Website">
-          <a-auto-complete
-            v-decorator="['website', { rules: [{ required: true, message: 'Please input website!' }] }]"
-            placeholder="website"
-            @change="handleWebsiteChange"
-          >
-            <template slot="dataSource">
-              <a-select-option v-for="website in autoCompleteResult" :key="website">
-                {{ website }}
-              </a-select-option>
-            </template>
-            <a-input />
-          </a-auto-complete>
-        </a-form-item>
-        <a-form-item
-          v-bind="formItemLayout"
-          label="Captcha"
-          extra="We must make sure that your are a human."
-        >
-          <a-row :gutter="8">
-            <a-col :span="12">
-              <a-input
-                v-decorator="[
-                  'captcha',
-                  { rules: [{ required: true, message: 'Please input the captcha you got!' }] },
-                ]"
-              />
-            </a-col>
-            <a-col :span="12">
-              <a-button>Get captcha</a-button>
-            </a-col>
-          </a-row>
-        </a-form-item>
-        <a-form-item v-bind="tailFormItemLayout">
-          <a-checkbox v-decorator="['agreement', { valuePropName: 'checked' }]">
-            I have read the
-            <a href="">
-              agreement
-            </a>
-          </a-checkbox>
-        </a-form-item>
-        <a-form-item v-bind="tailFormItemLayout">
-          <a-button type="primary" html-type="submit">
-            Register
-          </a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-  </div>
+  <a-config-provider :locale="locale">
+    <router-view/>
+  </a-config-provider>
 </template>
 
 <script>
-const residences = [
-  {
-    value: 'zhejiang',
-    label: 'Zhejiang',
-    children: [
-      {
-        value: 'hangzhou',
-        label: 'Hangzhou',
-        children: [
-          {
-            value: 'xihu',
-            label: 'West Lake',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: 'jiangsu',
-    label: 'Jiangsu',
-    children: [
-      {
-        value: 'nanjing',
-        label: 'Nanjing',
-        children: [
-          {
-            value: 'zhonghuamen',
-            label: 'Zhong Hua Men',
-          },
-        ],
-      },
-    ],
-  },
-];
+import {enquireScreen} from './utils/util'
+import {mapState, mapMutations} from 'vuex'
+import themeUtil from '@/utils/themeUtil';
+import {getI18nKey} from '@/utils/routerUtil'
 
 export default {
   name: 'App',
   data() {
     return {
-      confirmDirty: false,
-      residences,
-      autoCompleteResult: [],
-      formItemLayout: {
-        labelCol: {
-          xs: { span: 24 },
-          sm: { span: 8 },
-        },
-        wrapperCol: {
-          xs: { span: 24 },
-          sm: { span: 16 },
-        },
-      },
-      tailFormItemLayout: {
-        wrapperCol: {
-          xs: {
-            span: 24,
-            offset: 0,
-          },
-          sm: {
-            span: 16,
-            offset: 8,
-          },
-        },
-      },
-    };
+      locale: {}
+    }
   },
-  beforeCreate() {
-    this.form = this.$form.createForm(this, { name: 'register' });
+  created () {
+    this.setHtmlTitle()
+    this.setLanguage(this.lang)
+    enquireScreen(isMobile => this.setDevice(isMobile))
+  },
+  mounted() {
+   this.setWeekModeTheme(this.weekMode)
+  },
+  watch: {
+    weekMode(val) {
+      this.setWeekModeTheme(val)
+    },
+    lang(val) {
+      this.setLanguage(val)
+    },
+    $route() {
+      this.setHtmlTitle()
+    },
+    'theme.mode': function(val) {
+      let closeMessage = this.$message.loading(`您选择了主题模式 ${val}, 正在切换...`)
+      themeUtil.changeThemeColor(this.theme.color, val).then(closeMessage)
+    },
+    'theme.color': function(val) {
+      let closeMessage = this.$message.loading(`您选择了主题色 ${val}, 正在切换...`)
+      themeUtil.changeThemeColor(val, this.theme.mode).then(closeMessage)
+    }
+  },
+  computed: {
+    ...mapState('setting', ['theme', 'weekMode', 'lang'])
   },
   methods: {
-    handleSubmit(e) {
-      e.preventDefault();
-      this.form.validateFieldsAndScroll((err, values) => {
-        if (!err) {
-          console.log('Received values of form: ', values);
-        }
-      });
-    },
-    handleConfirmBlur(e) {
-      const value = e.target.value;
-      this.confirmDirty = this.confirmDirty || !!value;
-    },
-    compareToFirstPassword(rule, value, callback) {
-      const form = this.form;
-      if (value && value !== form.getFieldValue('password')) {
-        callback('Two passwords that you enter is inconsistent!');
+    ...mapMutations('setting', ['setDevice']),
+    setWeekModeTheme(weekMode) {
+      if (weekMode) {
+        document.body.classList.add('week-mode')
       } else {
-        callback();
+        document.body.classList.remove('week-mode')
       }
     },
-    validateToNextPassword(rule, value, callback) {
-      const form = this.form;
-      if (value && this.confirmDirty) {
-        form.validateFields(['confirm'], { force: true });
+    setLanguage(lang) {
+      this.$i18n.locale = lang
+      switch (lang) {
+        case 'CN':
+          this.locale = require('ant-design-vue/es/locale-provider/zh_CN').default
+          break
+        case 'HK':
+          this.locale = require('ant-design-vue/es/locale-provider/zh_TW').default
+          break
+        case 'US':
+        default:
+          this.locale = require('ant-design-vue/es/locale-provider/en_US').default
+          break
       }
-      callback();
     },
-    handleWebsiteChange(value) {
-      let autoCompleteResult;
-      if (!value) {
-        autoCompleteResult = [];
-      } else {
-        autoCompleteResult = ['.com', '.org', '.net'].map(domain => `${value}${domain}`);
-      }
-      this.autoCompleteResult = autoCompleteResult;
+    setHtmlTitle() {
+      const route = this.$route
+      const key = route.path === '/' ? 'home.name' : getI18nKey(route.matched[route.matched.length - 1].path)
+      document.title = process.env.VUE_APP_NAME + ' | ' + this.$t(key)
     },
-  },
-};
+  }
+}
 </script>
 
-<style lang="scss" scoped>
-  .content{
-    width: 600px;
-    margin: 0 auto;
+<style lang="less" scoped>
+  #id{
   }
 </style>

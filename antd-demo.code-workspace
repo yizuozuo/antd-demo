@@ -1,10 +1,10 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "..\\..\\vue-antd-admin\\vue-antd-admin"
-		}
-	]
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "..\\..\\vue-antd-admin"
+    }
+  ]
 }
